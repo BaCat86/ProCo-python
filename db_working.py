@@ -57,6 +57,9 @@ def db_create():
       Name TEXT NOT NULL,
       -- Описание атрибута
       desc TEXT NULL    ,
+      -- ID пользователя
+      UID       TEXT NOT NULL,
+      FOREIGN KEY (UID) REFERENCES Users (ID),
       PRIMARY KEY (ID));''')
     print("[server][db_create]Создание таблицы Attr - успешно")
 
@@ -76,7 +79,7 @@ def db_create():
       -- ID (связь с) атрибутом
       attrID TEXT    NOT NULL,
       -- ID значения
-      vID    TEXT    NOT NULL,
+      vID    TEXT    NULL,
       -- Положение в портфолио
       orderField  INTEGER NOT NULL,
       PRIMARY KEY (ID),
@@ -85,18 +88,18 @@ def db_create():
       FOREIGN KEY (vID) REFERENCES value (ID));''')
     print("[server][db_create]Создание таблицы attrAssign - успешно")
 
-    # BaseGroup
-    cursor.execute('''CREATE TABLE IF NOT EXISTS BaseGroup
-    ( -- Имя группы
-      groupName TEXT NOT NULL,
-      -- ID пользователя
-      UID       TEXT NOT NULL,
-      -- ID атрибута
-      AID       TEXT NOT NULL,
-      PRIMARY KEY (groupName, UID, AID),
-      FOREIGN KEY (UID) REFERENCES Users (ID),
-      FOREIGN KEY (AID) REFERENCES Attr (ID));''')
-    print("[server][db_create]Создание таблицы BaseGroup - успешно")
+    # # BaseGroup
+    # cursor.execute('''CREATE TABLE IF NOT EXISTS BaseGroup
+    # ( -- Имя группы
+    #   groupName TEXT NOT NULL,
+    #   -- ID пользователя
+    #   UID       TEXT NOT NULL,
+    #   -- ID атрибута
+    #   AID       TEXT NOT NULL,
+    #   PRIMARY KEY (groupName, UID, AID),
+    #   FOREIGN KEY (UID) REFERENCES Users (ID),
+    #   FOREIGN KEY (AID) REFERENCES Attr (ID));''')
+    # print("[server][db_create]Создание таблицы BaseGroup - успешно")
 
     connection.commit() # Изменения сохранены
     print("[server][db_create]Изменения сохранены")
@@ -133,7 +136,7 @@ def authorization(data):
 def portfolio_create(data):
     cursor.execute("INSERT INTO Portfolios (userID, Name) VALUES (?, ?)", data)
     connection.commit()
-    print('Отлично, портфолио создано!')
+    print('[server][portfolio_create]Отлично, портфолио создано!')
 
 def portfolio_choice(local_id):
     cursor.execute(f"SELECT Name FROM Portfolios where userID='{local_id}'")
@@ -144,9 +147,28 @@ def portfolio_choice(local_id):
     return b
 
 def portfolio_view(local_id):
-    print("Тут должны быть свойства портфолио, но они ищё не добавлены")
+    print("[server][portfolio_view]Тут должны быть свойства портфолио, но они ищё не добавлены")
 
 def attr_create(data):
-    cursor.execute("INSERT INTO Attr (Name, desc) VALUES (?, ?)", data)
+    cursor.execute("INSERT INTO Attr (Name, desc, UID) VALUES (?, ?, ?)", data)
     connection.commit()
-    print('Отличнео, аттрибут создан!')
+    print('[server][attr_create]Отлично, аттрибут создан!')
+
+def attr_view(local_id):
+    cursor.execute(f"SELECT Name, desc, ID FROM Attr where UID='{local_id}'")
+    a = cursor.fetchall()
+    res = []
+    for i in range(len(a)):
+        res.append([a[i][0], a[i][1], a[i][2]])
+    return res
+
+def attr_del(local_id, attr_id):
+    cursor.execute(f"DELETE FROM Attr where ID='{attr_id}'")
+    connection.commit()
+    print('[server][attr_del]Отлично, аттрибут удалён!')
+
+def ptf_attr_add(local_id, attr_res):
+    data = (local_id, attr_res, 1)
+    cursor.execute(f"INSERT INTO attrAssign (ptfID, attrID, orderField) VALUES (?, ?, ?)", data)
+    connection.commit()
+    print('[server][ptf_attr_add]Отлично, аттрибут привязан к портфолио!')
