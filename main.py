@@ -1,6 +1,15 @@
 import sys
 import db_working as db
+from sys import platform
+import os
 
+def clear():
+    if platform == 'linux' or platform == 'linux':
+        os.system('clear')
+    elif platform == 'win32':
+        os.system('cls')
+    elif platform == "darwin":
+        os.system('cls')
 
 def main():
     db.db_create()
@@ -8,6 +17,7 @@ def main():
     menu(local_id)
 
 def authorization():
+    clear()
     print("[client][authorization]Необходимо пройти авторизацию")
     user_login = input("[client][authorization]Пожалуйста, введите ваш логин: ")
     user_password = input("[client][authorization]Пожалуйста, введите ваш пароль: ")
@@ -16,6 +26,7 @@ def authorization():
     return _
 
 def registration():
+    clear()
     print("[client][registration]Необходимо пройти регистрацию")
     user_login = input("[client][registration]Пожалуйста, введите желаемый логин: ")
     user_password = input("[client][registration]Отлично!\nТеперь введите пароль: ")
@@ -38,6 +49,7 @@ def entry_menu():
         sys.exit()
 
 def menu(local_id):
+    clear()
     print(
         "[client][menu]С возвращением в ProCo!\nВыберите из списка действие, которое хотите сделать с портфолио:\n0. Выход\n1. Посмотреть существующее\n2. Создать новое\n3. Изменить существующее\n4. Редактировать аттрибуты.")
     menu_an = int(input("[client][menu]Ваш выбор: "))
@@ -57,17 +69,20 @@ def menu(local_id):
         menu(local_id)
 
 def portfolio_view(local_id):
+    clear()
     ptf = portfolio_choice(local_id)
     data = (local_id, ptf)
     db.portfolio_view(data)
 
 def portfolio_create(local_id):
+    clear()
     print('Давайте заполним ваше новое портфолио!')
     name = input('Введите имя человека, на которого заполняется портфолио: ')
     data = (local_id, name)
     db.portfolio_create(data)
 
 def portfolio_edit(local_id):
+    clear()
     # ptf = portfolio_choice(local_id)
     print("Выберите действие с портфолио из списка:\n0.Назад\n1.Посмотреть аттрибуты портфолио\n2.Редактировать значения аттрибутов\n3.Удалить аттрибут\n4.Добавить аттрибут")
     res = int(input("Ваш выбор: "))
@@ -77,7 +92,7 @@ def portfolio_edit(local_id):
         ptf_attr_view(local_id)
         portfolio_edit(local_id)
     elif res == 2:
-        ptf_attr_edit()
+        ptf_attr_edit(local_id)
         portfolio_edit(local_id)
     elif res == 3:
         ptf_attr_del()
@@ -87,27 +102,35 @@ def portfolio_edit(local_id):
         portfolio_edit(local_id)
 
 def portfolio_choice(local_id):
-    pfs = db.portfolio_choice(local_id)
+    ptf = db.portfolio_choice(local_id)
     print("Выберите портфолио из списка:")
-    for _ in range(len(pfs)):
-        print(f"{_ + 1}. {pfs[_]}")
+    b = []
+    for i in range(len(ptf)):
+        b.append(ptf[i][0])
+    for _ in range(len(b)):
+        print(f"{_ + 1}. {b[_]}")
     a = int(input("Ваш выбор: "))
     a -= 1
-    return a
+    res = [ptf[a]]
+    return res
 
 def attr_menu(local_id):
+    clear()
     print(
         "[client][attr_menu]Выберите действие с аттрибутами из списка:\n0. Назад\n1. Создание аттрибута\n2. Удаление аттрибута\n3. Посмотреть все аттрибуты")
     menu_an = int(input("[client][attr_menu]Ваш выбор: "))
     if menu_an == 0:
         pass
     elif menu_an == 1:
+        clear()
         attr_create(local_id)
         attr_menu(local_id)
     elif menu_an == 2:
+        clear()
         attr_del(local_id)
         attr_menu(local_id)
     elif menu_an == 3:
+        clear()
         attr_view(local_id)
         attr_menu(local_id)
 
@@ -130,10 +153,32 @@ def attr_view(local_id):
     return attr
 
 def ptf_attr_view(local_id):
-    pass
+    ptf = portfolio_choice(local_id)
+    attr = db.ptf_attr_view(ptf[0][1])
+    print(f"Портфолио {ptf[0][0]} имеет следующие аттрибуты:")
+    print(attr)
+    for _ in range(len(attr)):
+        print(f"{_ + 1}. {attr[_][0][0]} - {attr[_][0][1]}")
 
-def ptf_attr_edit():
-    pass
+def ptf_attr_choice(local_id):
+    ptf = portfolio_choice(local_id)
+    attr = db.ptf_attr_view(ptf[0][1])
+    print(f"Выберите, какой атрибут у {ptf[0][0]} вы хотите изменить:")
+    for _ in range(len(attr)):
+        print(f"{_ + 1}. {attr[_][0][0]} - {attr[_][0][1]}")
+    attr_res = int(input("Ваш выбор: "))
+    return attr_res
+
+
+def ptf_attr_edit(local_id):
+    ptf = portfolio_choice(local_id)
+    print(ptf)
+    attr = ptf_attr_choice(local_id)
+    print(attr)
+    a = input("Значение которое вы хотите придать этому атрибуту: ")
+    print(a)
+    # db.ptf_attr_edit()
+
 
 def ptf_attr_del():
     pass
@@ -143,6 +188,6 @@ def ptf_attr_add(local_id):
     print('Выберите из списка аттрибут, который хотите добавить к портфолио')
     attr = attr_view(local_id)
     attr_res = int(input("Ваш выбор: "))
-    db.ptf_attr_add(ptf, attr[attr_res - 1][2])
+    db.ptf_attr_add(ptf[0][1], attr[attr_res - 1][2])
 
 main()

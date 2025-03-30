@@ -123,9 +123,9 @@ def authorization(data):
         a = cursor.fetchall()
         if a[0][0] == data[1]:
             cursor.execute(f"SELECT ID FROM Users where login='{data[0]}'")
-            _ = cursor.fetchall()[0][0]
+            res = cursor.fetchall()[0][0]
             print("[server][authorization]Авторизация успешна!")
-            return _
+            return res
         else:
             print("[server][authorization]Неверный пароль!")
             sys.exit()
@@ -139,12 +139,10 @@ def portfolio_create(data):
     print('[server][portfolio_create]Отлично, портфолио создано!')
 
 def portfolio_choice(local_id):
-    cursor.execute(f"SELECT Name FROM Portfolios where userID='{local_id}'")
-    a = cursor.fetchall()
-    b = []
-    for i in range(len(a)):
-        b.append(a[i][0])
-    return b
+    cursor.execute(f"SELECT Name, ID FROM Portfolios where userID='{local_id}'")
+    res = cursor.fetchall()
+    # print(f"[server][portfolio_choice]{res}")
+    return res
 
 def portfolio_view(local_id):
     print("[server][portfolio_view]Тут должны быть свойства портфолио, но они ищё не добавлены")
@@ -162,13 +160,28 @@ def attr_view(local_id):
         res.append([a[i][0], a[i][1], a[i][2]])
     return res
 
+def ptf_attr_view(ptf_id):
+    cursor.execute(f"SELECT attrID FROM attrAssign where ptfID='{ptf_id}'")
+    attrid = cursor.fetchall()
+    a = []
+    for _ in attrid:
+        a.append(_[0]) # Не, ну это лютый говнокод, но иначе с этим дико не удобно работатать
+    res = []
+    for _ in a:
+        cursor.execute(f"SELECT Name, desc FROM Attr where ID='{_}'")
+        res.append(cursor.fetchall())
+    return res
+
+def ptf_attr_edit():
+    pass
+
 def attr_del(local_id, attr_id):
     cursor.execute(f"DELETE FROM Attr where ID='{attr_id}'")
     connection.commit()
     print('[server][attr_del]Отлично, аттрибут удалён!')
 
-def ptf_attr_add(local_id, attr_res):
-    data = (local_id, attr_res, 1)
+def ptf_attr_add(ptf_id, attr_res):
+    data = (ptf_id, attr_res, 1)
     cursor.execute(f"INSERT INTO attrAssign (ptfID, attrID, orderField) VALUES (?, ?, ?)", data)
     connection.commit()
     print('[server][ptf_attr_add]Отлично, аттрибут привязан к портфолио!')
