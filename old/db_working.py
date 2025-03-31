@@ -3,7 +3,7 @@ import sys
 
 connection = sqlite3.connect("portfolios.db")
 cursor = connection.cursor()
-def db_create():
+def db_init():
     # Users
     cursor.execute('''CREATE TABLE IF NOT EXISTS Users
     ( ID        TEXT    NOT NULL DEFAULT(lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || '4' || substr(hex(randomblob(2)), 2) || '-' || substr('89AB', 1 + (abs(random()) % 4), 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6)))),
@@ -12,7 +12,7 @@ def db_create():
       last_seen INTEGER NULL,
       email     TEXT    NOT NULL,
       PRIMARY KEY (ID));''')
-    print("[server][db_create]Создание таблицы Users - успешно")
+    # print("[server][db_create]Создание таблицы Users - успешно")
 
     # Portfolios
     cursor.execute('''CREATE TABLE IF NOT EXISTS Portfolios
@@ -26,7 +26,7 @@ def db_create():
       pictures TEXT NULL    ,
       PRIMARY KEY (ID),
       FOREIGN KEY (userID) REFERENCES Users (ID));''')
-    print("[server][db_create]Создание таблицы Portfolios - успешно")
+    # print("[server][db_create]Создание таблицы Portfolios - успешно")
 
     # Tags
     cursor.execute('''CREATE TABLE IF NOT EXISTS Tags
@@ -35,7 +35,7 @@ def db_create():
       -- Что за тэг
       Name TEXT NOT NULL,
       PRIMARY KEY (ID));''')
-    print("[server][db_create]Создание таблицы Tags - успешно")
+    # print("[server][db_create]Создание таблицы Tags - успешно")
 
     # tagAssign
     cursor.execute('''CREATE TABLE IF NOT EXISTS tagAssign
@@ -47,7 +47,7 @@ def db_create():
       PRIMARY KEY (ID),
       FOREIGN KEY (tagID) REFERENCES Tags (ID),
       FOREIGN KEY (ptfID) REFERENCES Portfolios (ID));''')
-    print("[server][db_create]Создание таблицы tagAssign - успешно")
+    # print("[server][db_create]Создание таблицы tagAssign - успешно")
 
     # Attr
     cursor.execute('''CREATE TABLE IF NOT EXISTS Attr
@@ -61,7 +61,7 @@ def db_create():
       UID       TEXT NOT NULL,
       FOREIGN KEY (UID) REFERENCES Users (ID),
       PRIMARY KEY (ID));''')
-    print("[server][db_create]Создание таблицы Attr - успешно")
+    # print("[server][db_create]Создание таблицы Attr - успешно")
 
     # value
     cursor.execute('''CREATE TABLE IF NOT EXISTS value
@@ -69,7 +69,7 @@ def db_create():
       value TEXT NULL    ,
       meta  TEXT NOT NULL,
       PRIMARY KEY (ID));''')
-    print("[server][db_create]Создание таблицы value - успешно")
+    # print("[server][db_create]Создание таблицы value - успешно")
 
     # attrAssign
     cursor.execute('''CREATE TABLE IF NOT EXISTS attrAssign
@@ -86,7 +86,7 @@ def db_create():
       FOREIGN KEY (ptfID) REFERENCES Portfolios (ID),
       FOREIGN KEY (attrID) REFERENCES Attr (ID),
       FOREIGN KEY (vID) REFERENCES value (ID));''')
-    print("[server][db_create]Создание таблицы attrAssign - успешно")
+    # print("[server][db_create]Создание таблицы attrAssign - успешно")
 
     # # BaseGroup
     # cursor.execute('''CREATE TABLE IF NOT EXISTS BaseGroup
@@ -102,7 +102,8 @@ def db_create():
     # print("[server][db_create]Создание таблицы BaseGroup - успешно")
 
     connection.commit() # Изменения сохранены
-    print("[server][db_create]Изменения сохранены")
+    # print("[server][db_create]Изменения сохранены")
+    print("[server][db_create]База данных успешно инициализирована")
 
 def registration(data):
     cursor.execute('INSERT INTO Users (login, password, email) VALUES (?, ?, ?);', data)
@@ -145,7 +146,8 @@ def portfolio_choice(local_id):
     return res
 
 def portfolio_view(local_id):
-    print("[server][portfolio_view]Тут должны быть свойства портфолио, но они ищё не добавлены")
+    print("[server][portfolio_view]Тут должны быть свойства портфолио, но они ищё не добавлены") # FIX: ну типо тут вообще функционала нет
+    _ = input("Нажмите ENTER, что бы продолжить... ")
 
 def attr_create(data):
     cursor.execute("INSERT INTO Attr (Name, desc, UID) VALUES (?, ?, ?)", data)
@@ -175,7 +177,7 @@ def ptf_attr_view(ptf_id):
 def ptf_attr_edit():
     pass
 
-def attr_del(local_id, attr_id):
+def attr_del(attr_id):
     cursor.execute(f"DELETE FROM Attr where ID='{attr_id}'")
     connection.commit()
     print('[server][attr_del]Отлично, аттрибут удалён!')

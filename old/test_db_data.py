@@ -1,7 +1,7 @@
 import sqlite3
 import db_working
 
-db_working.db_create()
+db_working.db_init()
 connection = sqlite3.connect("portfolios.db")
 cursor = connection.cursor()
 def users():

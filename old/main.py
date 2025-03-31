@@ -1,195 +1,73 @@
 import sys
 import db_working as db
-from sys import platform
-import os
-
-def clear():
-    if platform == 'linux' or platform == 'linux':
-        os.system('clear')
-    elif platform == 'win32':
-        os.system('cls')
-    elif platform == "darwin":
-        os.system('cls')
+import act
 
 def main():
-    db.db_create()
-    local_id = entry_menu()
+    db.db_init() # Инициализация бд (проверка, существует ли она и если нет, то создание)
+    local_id = entry_menu() # получаем что-то вроде local_id = (user_id, user_name)
     menu(local_id)
-
-def authorization():
-    clear()
-    print("[client][authorization]Необходимо пройти авторизацию")
-    user_login = input("[client][authorization]Пожалуйста, введите ваш логин: ")
-    user_password = input("[client][authorization]Пожалуйста, введите ваш пароль: ")
-    data = (user_login, user_password)
-    _ = db.authorization(data)
-    return _
-
-def registration():
-    clear()
-    print("[client][registration]Необходимо пройти регистрацию")
-    user_login = input("[client][registration]Пожалуйста, введите желаемый логин: ")
-    user_password = input("[client][registration]Отлично!\nТеперь введите пароль: ")
-    user_email = input("[client][registration]И на последок!\nВведите электронную почту: ")
-    data = (user_login, user_password, user_email)
-    db.registration(data)
 
 def entry_menu():
     print(
-        "[client][entry_menu]Добро пожаловать в ProCo!\nПожалуйта, выберите из списка желаемое действие:\n1.Вход\n2.Регистрация\n3.Выход")
+        "[client][entry_menu]Добро пожаловать в ProCo!\nПожалуйта, выберите из списка желаемое действие:\n--------------\n0.Выход\n1.Вход\n2.Регистрация")
     menu_an = int(input("[client][entry_menu]Ваш выбор: "))
     if menu_an == 1:
-        _ = authorization()
+        _ = act.authorization()
         return _
     elif menu_an == 2:
-        registration()
-        print("Пожалуйста, перезапустите скрипт и войдите в аккаунт")
+        act.registration()
+        print("Пожалуйста, перезапустите скрипт и войдите в аккаунт") # FIX: По хорошему сделать так, что бы не недо было перезапускать скрипт
         sys.exit()
-    elif menu_an == 3:
+    elif menu_an == 0:
         sys.exit()
 
 def menu(local_id):
-    clear()
+    act.clear()
     print(
-        "[client][menu]С возвращением в ProCo!\nВыберите из списка действие, которое хотите сделать с портфолио:\n0. Выход\n1. Посмотреть существующее\n2. Создать новое\n3. Изменить существующее\n4. Редактировать аттрибуты.")
+        f"[client][menu]С возвращением в ProCo, {local_id[1]}!\nВыберите из списка действие, которое хотите сделать с портфолио:\n--------------\n0. Выход\n1. Посмотреть существующее\n2. Создать новое\n3. Изменить существующее\n4. Редактировать аттрибуты.")
     menu_an = int(input("[client][menu]Ваш выбор: "))
+    act.clear()
     if menu_an == 0:
         sys.exit()
     elif menu_an == 1:
-        portfolio_view(local_id)
-        menu(local_id)
+        act.portfolio_view(local_id[0])
     elif menu_an == 2:
-        portfolio_create(local_id)
-        menu(local_id)
+        act.portfolio_create(local_id[0])
     elif menu_an == 3:
-        portfolio_edit(local_id)
-        menu(local_id)
+        portfolio_edit_menu(local_id[0])
     elif menu_an == 4:
-        attr_menu(local_id)
-        menu(local_id)
+        attr_menu(local_id[0])
+    menu(local_id)
 
-def portfolio_view(local_id):
-    clear()
-    ptf = portfolio_choice(local_id)
-    data = (local_id, ptf)
-    db.portfolio_view(data)
-
-def portfolio_create(local_id):
-    clear()
-    print('Давайте заполним ваше новое портфолио!')
-    name = input('Введите имя человека, на которого заполняется портфолио: ')
-    data = (local_id, name)
-    db.portfolio_create(data)
-
-def portfolio_edit(local_id):
-    clear()
-    # ptf = portfolio_choice(local_id)
-    print("Выберите действие с портфолио из списка:\n0.Назад\n1.Посмотреть аттрибуты портфолио\n2.Редактировать значения аттрибутов\n3.Удалить аттрибут\n4.Добавить аттрибут")
+def portfolio_edit_menu(local_id):
+    print("Выберите действие с портфолио из списка:\n--------------\n0.Назад\n1.Посмотреть аттрибуты портфолио\n2.Редактировать значения аттрибутов\n3.Удалить аттрибут\n4.Добавить аттрибут")
     res = int(input("Ваш выбор: "))
     if res == 0:
-        pass
+        menu(local_id)
     elif res == 1:
-        ptf_attr_view(local_id)
-        portfolio_edit(local_id)
+        act.ptf_attr_view(local_id)
     elif res == 2:
-        ptf_attr_edit(local_id)
-        portfolio_edit(local_id)
+        act.ptf_attr_edit(local_id)
     elif res == 3:
-        ptf_attr_del()
-        portfolio_edit(local_id)
+        act.ptf_attr_del()
     elif res == 4:
-        ptf_attr_add(local_id)
-        portfolio_edit(local_id)
-
-def portfolio_choice(local_id):
-    ptf = db.portfolio_choice(local_id)
-    print("Выберите портфолио из списка:")
-    b = []
-    for i in range(len(ptf)):
-        b.append(ptf[i][0])
-    for _ in range(len(b)):
-        print(f"{_ + 1}. {b[_]}")
-    a = int(input("Ваш выбор: "))
-    a -= 1
-    res = [ptf[a]]
-    return res
+        act.ptf_attr_add(local_id)
+    portfolio_edit_menu(local_id)
 
 def attr_menu(local_id):
-    clear()
     print(
-        "[client][attr_menu]Выберите действие с аттрибутами из списка:\n0. Назад\n1. Создание аттрибута\n2. Удаление аттрибута\n3. Посмотреть все аттрибуты")
+        "[client][attr_menu]Выберите действие с аттрибутами из списка:\n--------------\n0. Назад\n1. Создание аттрибута\n2. Удаление аттрибута\n3. Посмотреть все аттрибуты")
     menu_an = int(input("[client][attr_menu]Ваш выбор: "))
+    act.clear()
     if menu_an == 0:
-        pass
+        menu(local_id)
     elif menu_an == 1:
-        clear()
-        attr_create(local_id)
-        attr_menu(local_id)
+        act.attr_create(local_id)
     elif menu_an == 2:
-        clear()
-        attr_del(local_id)
-        attr_menu(local_id)
+        act.attr_del(local_id)
     elif menu_an == 3:
-        clear()
-        attr_view(local_id)
-        attr_menu(local_id)
-
-def attr_create(local_id):
-    attr_name = input("Название аттрибута: ")
-    attr_desc = input("Описание аттрибута: ")
-    data = (attr_name, attr_desc, local_id)
-    db.attr_create(data)
-
-def attr_del(local_id):
-    print("[client][attr_del]Выберите из списка аттрибут для удаления:")
-    b = attr_view(local_id)
-    a = int(input("Ваш выбор: "))
-    db.attr_del(local_id, b[a - 1][2])
-
-def attr_view(local_id):
-    attr = db.attr_view(local_id)
-    for _ in range(len(attr)):
-        print(f"{_ + 1}. {attr[_][0]} - {attr[_][1]}")
-    return attr
-
-def ptf_attr_view(local_id):
-    ptf = portfolio_choice(local_id)
-    attr = db.ptf_attr_view(ptf[0][1])
-    print(f"Портфолио {ptf[0][0]} имеет следующие аттрибуты:")
-    print(attr)
-    for _ in range(len(attr)):
-        print(f"{_ + 1}. {attr[_][0][0]} - {attr[_][0][1]}")
-
-def ptf_attr_choice(local_id):
-    ptf = portfolio_choice(local_id)
-    attr = db.ptf_attr_view(ptf[0][1])
-    print(f"Выберите, какой атрибут у {ptf[0][0]} вы хотите изменить:")
-    for _ in range(len(attr)):
-        print(f"{_ + 1}. {attr[_][0][0]} - {attr[_][0][1]}")
-    attr_res = int(input("Ваш выбор: "))
-    return attr_res
-
-
-def ptf_attr_edit(local_id):
-    ptf = portfolio_choice(local_id)
-    print(ptf)
-    attr = ptf_attr_choice(local_id)
-    print(attr)
-    a = input("Значение которое вы хотите придать этому атрибуту: ")
-    print(a)
-    # db.ptf_attr_edit()
-
-
-def ptf_attr_del():
-    pass
-
-def ptf_attr_add(local_id):
-    ptf = portfolio_choice(local_id)
-    print('Выберите из списка аттрибут, который хотите добавить к портфолио')
-    attr = attr_view(local_id)
-    attr_res = int(input("Ваш выбор: "))
-    db.ptf_attr_add(ptf[0][1], attr[attr_res - 1][2])
+        act.attr_view(local_id)
+    attr_menu(local_id)
 
 if __name__ == "__main__":
     main()
-
