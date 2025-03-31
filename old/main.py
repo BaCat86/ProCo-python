@@ -190,4 +190,6 @@ def ptf_attr_add(local_id):
     attr_res = int(input("Ваш выбор: "))
     db.ptf_attr_add(ptf[0][1], attr[attr_res - 1][2])
 
-main()
+if __name__ == "__main__":
+    main()
+
