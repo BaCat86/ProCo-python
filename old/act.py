@@ -3,7 +3,7 @@ import os
 import db_working as db
 
 def clear():
-    if platform == 'linux' or platform == 'linux':
+    if platform == 'linux':
         os.system('clear')
     elif platform == 'win32':
         os.system('cls')
@@ -46,6 +46,7 @@ def portfolio_choice(local_id):
     res = [ptf[a]]
     return res
 
+
 def portfolio_create(local_id):
     print('Давайте заполним ваше новое портфолио!')
     name = input('Введите имя человека, на которого заполняется портфолио: ')
@@ -73,10 +74,12 @@ def attr_view(local_id):
 def ptf_attr_view(local_id):
     ptf = portfolio_choice(local_id)
     attr = db.ptf_attr_view(ptf[0][1])
-    print(f"Портфолио {ptf[0][0]} имеет следующие аттрибуты:")
-    print(attr)
-    for _ in range(len(attr)):
-        print(f"{_ + 1}. {attr[_][0][0]} - {attr[_][0][1]}")
+    if attr != []:
+        print(f"Портфолио {ptf[0][0]} имеет следующие аттрибуты:")
+        for _ in range(len(attr)):
+            print(f"{_ + 1}. {attr[_][0][0]} - {attr[_][0][1]}")
+    else:
+        print(f"Портфолио {ptf[0][0]} не имеет аттрибуты")
 
 def ptf_attr_choice(local_id):
     ptf = portfolio_choice(local_id)
@@ -96,8 +99,17 @@ def ptf_attr_edit(local_id):
     print(a)
     # db.ptf_attr_edit()
 
-def ptf_attr_del():
-    pass
+def ptf_attr_del(local_id):
+    ptf = portfolio_choice(local_id) # Выбираем портфолио, у которого удалим аттрибут
+    attr = db.ptf_attr_view(ptf[0][1]) # Находим все аттрибуты у портфолио
+    if attr != [] and attr != [[]]: # Проверяем на наличие аттрибутов
+        print(f"Какой из аттрибутов будете удалять?")
+        for _ in range(len(attr)):
+            print(f"{_ + 1}. {attr[_][0][0]} - {attr[_][0][1]}")
+        _ = int(input("Ваш выбор: ")) - 1 # Номер нужного нам портфолио, получаем сразу значение для списка
+        db.ptf_attr_del(attr[_][0][2])
+    else:
+        print(f"Портфолио {ptf[0][0]} не имеет аттрибуты")
 
 def ptf_attr_add(local_id):
     ptf = portfolio_choice(local_id)

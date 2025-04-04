@@ -4,7 +4,8 @@ import act
 
 def main():
     db.db_init() # Инициализация бд (проверка, существует ли она и если нет, то создание)
-    local_id = entry_menu() # получаем что-то вроде local_id = (user_id, user_name)
+    # local_id = entry_menu()
+    local_id = ('599d253c-d924-445b-b7d9-7297597b10ff', '123') # получаем что-то вроде local_id = (user_id, user_name)
     menu(local_id)
 
 def entry_menu():
@@ -13,6 +14,7 @@ def entry_menu():
     menu_an = int(input("[client][entry_menu]Ваш выбор: "))
     if menu_an == 1:
         _ = act.authorization()
+        print(_)
         return _
     elif menu_an == 2:
         act.registration()
@@ -49,16 +51,16 @@ def portfolio_edit_menu(local_id):
     elif res == 2:
         act.ptf_attr_edit(local_id)
     elif res == 3:
-        act.ptf_attr_del()
+        act.ptf_attr_del(local_id)
     elif res == 4:
         act.ptf_attr_add(local_id)
     portfolio_edit_menu(local_id)
 
 def attr_menu(local_id):
+    act.clear()
     print(
         "[client][attr_menu]Выберите действие с аттрибутами из списка:\n--------------\n0. Назад\n1. Создание аттрибута\n2. Удаление аттрибута\n3. Посмотреть все аттрибуты")
     menu_an = int(input("[client][attr_menu]Ваш выбор: "))
-    act.clear()
     if menu_an == 0:
         menu(local_id)
     elif menu_an == 1:
@@ -67,6 +69,7 @@ def attr_menu(local_id):
         act.attr_del(local_id)
     elif menu_an == 3:
         act.attr_view(local_id)
+        _ = input("Нажмите ENTER, для продолжения...")
     attr_menu(local_id)
 
 if __name__ == "__main__":

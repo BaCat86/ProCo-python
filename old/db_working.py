@@ -3,7 +3,7 @@ import sys
 
 connection = sqlite3.connect("portfolios.db")
 cursor = connection.cursor()
-def db_init():
+def db_init(): # Инициализация (создаёт бд, если её не существует)
     # Users
     cursor.execute('''CREATE TABLE IF NOT EXISTS Users
     ( ID        TEXT    NOT NULL DEFAULT(lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || '4' || substr(hex(randomblob(2)), 2) || '-' || substr('89AB', 1 + (abs(random()) % 4), 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6)))),
@@ -105,14 +105,14 @@ def db_init():
     # print("[server][db_create]Изменения сохранены")
     print("[server][db_create]База данных успешно инициализирована")
 
-def registration(data):
+def registration(data): # Сохранение в базе данных нового пользователя
     cursor.execute('INSERT INTO Users (login, password, email) VALUES (?, ?, ?);', data)
     cursor.execute("SELECT * FROM Users")
     connection.commit() # Изменения сохранены
     print("[server][registration]Пользователь создан")
     print("[server][registration]Изменения сохранены")
 
-def authorization(data):
+def authorization(data): # Авторизация пользователя (Проверка на уществование в бд, проверка доступа)
     cursor.execute("SELECT login FROM Users")
     a = cursor.fetchall() # Перебираем, что бы получить логины в человеческом виде
     b = []
@@ -134,27 +134,26 @@ def authorization(data):
         print("[server][authorization]Пользователя не существует!")
         sys.exit()
 
-def portfolio_create(data):
+def portfolio_create(data): # Создание в бд нового пустого портфолио
     cursor.execute("INSERT INTO Portfolios (userID, Name) VALUES (?, ?)", data)
     connection.commit()
     print('[server][portfolio_create]Отлично, портфолио создано!')
 
-def portfolio_choice(local_id):
+def portfolio_choice(local_id): # Выбор портфолио (находит в бд все портфолио пользователя по его id)
     cursor.execute(f"SELECT Name, ID FROM Portfolios where userID='{local_id}'")
     res = cursor.fetchall()
-    # print(f"[server][portfolio_choice]{res}")
     return res
 
-def portfolio_view(local_id):
+def portfolio_view(local_id): # Получение из бд атрибутов портфолио и их значений
     print("[server][portfolio_view]Тут должны быть свойства портфолио, но они ищё не добавлены") # FIX: ну типо тут вообще функционала нет
     _ = input("Нажмите ENTER, что бы продолжить... ")
 
-def attr_create(data):
+def attr_create(data): # Добавление в бд аттрибута
     cursor.execute("INSERT INTO Attr (Name, desc, UID) VALUES (?, ?, ?)", data)
     connection.commit()
     print('[server][attr_create]Отлично, аттрибут создан!')
 
-def attr_view(local_id):
+def attr_view(local_id): # Получение из бд всех аттрибутов пользователя
     cursor.execute(f"SELECT Name, desc, ID FROM Attr where UID='{local_id}'")
     a = cursor.fetchall()
     res = []
@@ -162,7 +161,7 @@ def attr_view(local_id):
         res.append([a[i][0], a[i][1], a[i][2]])
     return res
 
-def ptf_attr_view(ptf_id):
+def ptf_attr_view(ptf_id): # Получение из бд аттрибутов этого портфолио
     cursor.execute(f"SELECT attrID FROM attrAssign where ptfID='{ptf_id}'")
     attrid = cursor.fetchall()
     a = []
@@ -170,14 +169,14 @@ def ptf_attr_view(ptf_id):
         a.append(_[0]) # Не, ну это лютый говнокод, но иначе с этим дико не удобно работатать
     res = []
     for _ in a:
-        cursor.execute(f"SELECT Name, desc FROM Attr where ID='{_}'")
+        cursor.execute(f"SELECT Name, desc, ID FROM Attr where ID='{_}'")
         res.append(cursor.fetchall())
     return res
 
 def ptf_attr_edit():
     pass
 
-def attr_del(attr_id):
+def attr_del(attr_id): # Полное удаление аттрибута из бд
     cursor.execute(f"DELETE FROM Attr where ID='{attr_id}'")
     connection.commit()
     print('[server][attr_del]Отлично, аттрибут удалён!')
@@ -187,3 +186,8 @@ def ptf_attr_add(ptf_id, attr_res):
     cursor.execute(f"INSERT INTO attrAssign (ptfID, attrID, orderField) VALUES (?, ?, ?)", data)
     connection.commit()
     print('[server][ptf_attr_add]Отлично, аттрибут привязан к портфолио!')
+
+def ptf_attr_del(attr_id): # Удаление из бд связи между аттрибутом и портфолио
+    cursor.execute(f"DELETE FROM attrAssign where attrID='{attr_id}'")
+    connection.commit()
+    print('[server][attr_del]Отлично, аттрибут удалён!')
