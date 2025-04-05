@@ -2,13 +2,13 @@ import sys
 import db_working as db
 import act
 
-def main():
+def main(): # Точка старта
     db.db_init() # Инициализация бд (проверка, существует ли она и если нет, то создание)
     # local_id = entry_menu()
     local_id = ('599d253c-d924-445b-b7d9-7297597b10ff', '123') # получаем что-то вроде local_id = (user_id, user_name)
     menu(local_id)
 
-def entry_menu():
+def entry_menu(): # Меню авторизации
     print(
         "[client][entry_menu]Добро пожаловать в ProCo!\nПожалуйта, выберите из списка желаемое действие:\n--------------\n0.Выход\n1.Вход\n2.Регистрация")
     menu_an = int(input("[client][entry_menu]Ваш выбор: "))
@@ -23,7 +23,7 @@ def entry_menu():
     elif menu_an == 0:
         sys.exit()
 
-def menu(local_id):
+def menu(local_id): # Меню пользователя
     act.clear()
     print(
         f"[client][menu]С возвращением в ProCo, {local_id[1]}!\nВыберите из списка действие, которое хотите сделать с портфолио:\n--------------\n0. Выход\n1. Посмотреть существующее\n2. Создать новое\n3. Изменить существующее\n4. Редактировать аттрибуты.")
@@ -49,7 +49,7 @@ def portfolio_edit_menu(local_id):
     elif res == 1:
         act.ptf_attr_view(local_id)
     elif res == 2:
-        act.ptf_attr_edit(local_id)
+        act.ptf_attr_val_edit(local_id)
     elif res == 3:
         act.ptf_attr_del(local_id)
     elif res == 4:

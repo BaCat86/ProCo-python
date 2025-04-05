@@ -66,7 +66,7 @@ def db_init(): # Инициализация (создаёт бд, если её 
     # value
     cursor.execute('''CREATE TABLE IF NOT EXISTS value
     ( ID    TEXT NOT NULL DEFAULT(lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || '4' || substr(hex(randomblob(2)), 2) || '-' || substr('89AB', 1 + (abs(random()) % 4), 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6)))),
-      value TEXT NULL    ,
+      value TEXT NULL ,
       meta  TEXT NOT NULL,
       PRIMARY KEY (ID));''')
     # print("[server][db_create]Создание таблицы value - успешно")
@@ -79,7 +79,7 @@ def db_init(): # Инициализация (создаёт бд, если её 
       -- ID (связь с) атрибутом
       attrID TEXT    NOT NULL,
       -- ID значения
-      vID    TEXT    NULL,
+      vID    TEXT    NOT NULL,
       -- Положение в портфолио
       orderField  INTEGER NOT NULL,
       PRIMARY KEY (ID),
@@ -144,9 +144,30 @@ def portfolio_choice(local_id): # Выбор портфолио (находит 
     res = cursor.fetchall()
     return res
 
-def portfolio_view(local_id): # Получение из бд атрибутов портфолио и их значений
-    print("[server][portfolio_view]Тут должны быть свойства портфолио, но они ищё не добавлены") # FIX: ну типо тут вообще функционала нет
-    _ = input("Нажмите ENTER, что бы продолжить... ")
+def portfolio_view(ptf_id): # Получение из бд атрибутов портфолио и их значений
+    cursor.execute(f"SELECT attrID FROM attrAssign where ptfID='{ptf_id}'")
+    __ = cursor.fetchall()
+    cursor.execute(f"SELECT vID FROM attrAssign where ptfID='{ptf_id}'")
+    ___ = cursor.fetchall()
+    _ = (__, ___) # Получим что-то вроде([('attrID1',), ('attrID2',), ...,('attrIDn',)], [('vID1',), ('vID2',), ..., ('vIDn',)])
+    # print(_)
+    __ = []
+    for i in _[0]:
+        # print(i[0])
+        cursor.execute(f"SELECT Name, desc FROM Attr where ID='{i[0]}'")
+        a = cursor.fetchall()
+        # print(a)
+        __.append(a)
+    ___ = []
+    for i in _[1]:
+        # print(i[0])
+        cursor.execute(f"SELECT value, meta FROM value where ID='{i[0]}'")
+        a = cursor.fetchall()
+        # print(a)
+        ___.append(a)
+    res = (__, ___) # Получу что-то вроде ([[('attrName1', 'attrDesc1')], [('attrName2', 'attrDesc2')], ..., [('attrNameN', 'attrDescN')]], [[('value1', 'meta1')], [(value2, 'meta2')], ..., [(valueN, 'metaN')]])
+    return res
+
 
 def attr_create(data): # Добавление в бд аттрибута
     cursor.execute("INSERT INTO Attr (Name, desc, UID) VALUES (?, ?, ?)", data)
@@ -173,8 +194,12 @@ def ptf_attr_view(ptf_id): # Получение из бд аттрибутов �
         res.append(cursor.fetchall())
     return res
 
-def ptf_attr_edit():
-    pass
+def ptf_attr_val_edit(attr_for_edit):
+    cursor.execute(f"SELECT vID FROM attrAssign where (attrID, ptfID)=('{attr_for_edit[0]}', '{attr_for_edit[1]}')")
+    _ = cursor.fetchall()[0][0]
+    print(_)
+    cursor.execute("UPDATE value SET value = ? WHERE ID = ?", (attr_for_edit[2], _))
+    connection.commit()
 
 def attr_del(attr_id): # Полное удаление аттрибута из бд
     cursor.execute(f"DELETE FROM Attr where ID='{attr_id}'")
@@ -182,8 +207,12 @@ def attr_del(attr_id): # Полное удаление аттрибута из �
     print('[server][attr_del]Отлично, аттрибут удалён!')
 
 def ptf_attr_add(ptf_id, attr_res):
-    data = (ptf_id, attr_res, 1)
-    cursor.execute(f"INSERT INTO attrAssign (ptfID, attrID, orderField) VALUES (?, ?, ?)", data)
+    cursor.execute("INSERT INTO value (meta) VALUES (?)", ('321',))
+    cursor.execute(f"SELECT ID FROM value where meta='321'") # Возможно, это стоит исправить
+    _ = cursor.fetchall()
+    cursor.execute(f"UPDATE value SET (meta) = (?) where ID='{_[0][0]}'", ('text',))
+    data = (ptf_id, attr_res, 1, _[0][0])
+    cursor.execute(f"INSERT INTO attrAssign (ptfID, attrID, orderField, vID) VALUES (?, ?, ?, ?)", data)
     connection.commit()
     print('[server][ptf_attr_add]Отлично, аттрибут привязан к портфолио!')
 

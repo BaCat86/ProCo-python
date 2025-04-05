@@ -1,6 +1,8 @@
 from sys import platform
 import os
+import sys
 import db_working as db
+
 
 def clear():
     if platform == 'linux':
@@ -29,9 +31,15 @@ def registration():
     db.registration(data)
 
 def portfolio_view(local_id):
-    ptf = portfolio_choice(local_id)
-    data = (local_id, ptf)
-    db.portfolio_view(data)
+    ptf = portfolio_choice(local_id)[0]
+    _ = db.portfolio_view(ptf[1]) # Получу что-то вроде ([[('attrName1', 'attrDesc1')], [('attrName2', 'attrDesc2')], ..., [('attrNameN', 'attrDescN')]], [[('value1', 'meta1')], [(value2, 'meta2')], ..., [(valueN, 'metaN')]])
+    if str(_) != '([], [])':
+        print(f"[client][portfolio_view] Портфолио {ptf[0]} имеет следующие аттрибуты:")
+        for i in range(len(_[0])):
+            print(f"{i+1}. {_[0][i][0][0]} (Описание: {_[0][i][0][1]}) - {_[1][i][0][0]} (Тип значения:{_[1][i][0][1]})")
+    else:
+        print(f"[client][portfolio_view] Портфолио {ptf[0]} не имеет аттрибуты")
+    x = input('Нажмите ENTER, что бы продолжить...')
 
 def portfolio_choice(local_id):
     ptf = db.portfolio_choice(local_id)
@@ -44,7 +52,7 @@ def portfolio_choice(local_id):
     a = int(input("Ваш выбор: "))
     a -= 1
     res = [ptf[a]]
-    return res
+    return res # Получаем что-то вроде [('ptfName', 'ptfID')] FIX: убрать '[' и ']' в начале и конце соотвтственно, сейчас это не исправляюю тк эта переменная в слишком многих частях кода
 
 
 def portfolio_create(local_id):
@@ -87,17 +95,17 @@ def ptf_attr_choice(local_id):
     print(f"Выберите, какой атрибут у {ptf[0][0]} вы хотите изменить:")
     for _ in range(len(attr)):
         print(f"{_ + 1}. {attr[_][0][0]} - {attr[_][0][1]}")
-    attr_res = int(input("Ваш выбор: "))
-    return attr_res
+    _ = int(input("Ваш выбор: ")) - 1
+    attr_res = (attr[_][0], ptf[0])
 
-def ptf_attr_edit(local_id):
-    ptf = portfolio_choice(local_id)
-    print(ptf)
-    attr = ptf_attr_choice(local_id)
-    print(attr)
-    a = input("Значение которое вы хотите придать этому атрибуту: ")
-    print(a)
-    # db.ptf_attr_edit()
+    return attr_res # Вернём что-то вроде (('attrName', 'description', 'attrID'), ('ptfName', 'ptfID'))
+
+def ptf_attr_val_edit(local_id): # Изменение значения аттрибута
+    attr = ptf_attr_choice(local_id) # Получаем, то какого аттрибут будем менять, получим что-то вроде (('attrName', 'description', 'attrID'), ('ptfName', 'ptfID'))
+    print(f'Вы решили придать значение атрибуту {attr[0][0]} ({attr[0][1]})')
+    attr_val = input("Значение которое вы хотите придать этому атрибуту: ") # Получаем само значение
+    attr_for_edit = (attr[0][2], attr[1][1], attr_val) # Получим что-то вроде (attrID, ptfID, attr_val)
+    db.ptf_attr_val_edit(attr_for_edit)
 
 def ptf_attr_del(local_id):
     ptf = portfolio_choice(local_id) # Выбираем портфолио, у которого удалим аттрибут
