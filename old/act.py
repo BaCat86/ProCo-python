@@ -23,12 +23,21 @@ def authorization():
 
 def registration():
     clear()
-    print("[client][registration]Необходимо пройти регистрацию")
-    user_login = input("[client][registration]Пожалуйста, введите желаемый логин: ")
-    user_password = input("[client][registration]Отлично!\nТеперь введите пароль: ")
-    user_email = input("[client][registration]И на последок!\nВведите электронную почту: ")
-    data = (user_login, user_password, user_email)
-    db.registration(data)
+    try:
+        print("[client][registration]Необходимо пройти регистрацию")
+        user_login = input("[client][registration]Пожалуйста, введите желаемый логин: ")
+        user_password = input("[client][registration]Отлично!\nТеперь введите пароль: ")
+        user_email = input("[client][registration]И на последок!\nВведите электронную почту: ")
+        data = (user_login, user_password, user_email)
+        db.registration(data)
+    except db.sqlite3.IntegrityError as e:
+        if str(e)[-11:] == 'Users.email':
+            print("[server][registration]Невовозможно создать пользователя, тк почта уже занята")
+        elif str(e)[-11:] == 'Users.login':
+            print("[server][registration]Невовозможно создать пользователя, тк логин уже занят")
+        print('Попробуйте ещё раз')
+        x = input('Нажмите ENTER, что бы продолжить...')
+        registration()
 
 def portfolio_view(local_id):
     ptf = portfolio_choice(local_id)[0]

@@ -101,16 +101,21 @@ def db_init(): # Инициализация (создаёт бд, если её 
     #   FOREIGN KEY (AID) REFERENCES Attr (ID));''')
     # print("[server][db_create]Создание таблицы BaseGroup - успешно")
 
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_login ON Users (login);')
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_email ON Users (email);')
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_ptf ON Portfolios (Name);')
+
     connection.commit() # Изменения сохранены
     # print("[server][db_create]Изменения сохранены")
     print("[server][db_create]База данных успешно инициализирована")
 
 def registration(data): # Сохранение в базе данных нового пользователя
     cursor.execute('INSERT INTO Users (login, password, email) VALUES (?, ?, ?);', data)
-    cursor.execute("SELECT * FROM Users")
-    connection.commit() # Изменения сохранены
     print("[server][registration]Пользователь создан")
+    connection.commit() # Изменения сохранены
     print("[server][registration]Изменения сохранены")
+
+
 
 def authorization(data): # Авторизация пользователя (Проверка на уществование в бд, проверка доступа)
     cursor.execute("SELECT login FROM Users")
