@@ -10,13 +10,14 @@ def users():
     cursor.execute('INSERT INTO Users (login, password, email) VALUES (?, ?, ?);', ('kto', 'chto', 'aga'))
 
 def portfolios():
-    cursor.execute("INSERT INTO Portfolios (userID, Name) VALUES (?, ?)", (uid, 'ptf1'))
-    cursor.execute("INSERT INTO Portfolios (userID, Name) VALUES (?, ?)", (uid, 'ptf2'))
-    cursor.execute("INSERT INTO Portfolios (userID, Name) VALUES (?, ?)", (uid, 'ptf3'))
+    cursor.execute("INSERT INTO Portfolios (userID, Name) VALUES (?, ?)", (uid, 'BaCat'))
+    cursor.execute("INSERT INTO Portfolios (userID, Name) VALUES (?, ?)", (uid, 'MegaCoolDude'))
+    cursor.execute("INSERT INTO Portfolios (userID, Name) VALUES (?, ?)", (uid, 'Milimitary'))
+    cursor.execute("INSERT INTO Portfolios (userID, Name) VALUES (?, ?)", (uid, 'Summersay415'))
 def attr():
-    cursor.execute("INSERT INTO Attr (Name, desc, UID) VALUES (?, ?, ?)", ('1', '111', uid))
-    cursor.execute("INSERT INTO Attr (Name, desc, UID) VALUES (?, ?, ?)", ('2', '222',uid))
-    cursor.execute("INSERT INTO Attr (Name, desc, UID) VALUES (?, ?, ?)", ('3', '333',uid))
+    cursor.execute("INSERT INTO Attr (Name, desc, UID) VALUES (?, ?, ?)", ('Программирование', 'Любит прогать', uid))
+    cursor.execute("INSERT INTO Attr (Name, desc, UID) VALUES (?, ?, ?)", ('Ползуновка', 'Ходит на Ползуновку',uid))
+    cursor.execute("INSERT INTO Attr (Name, desc, UID) VALUES (?, ?, ?)", ('Музыка', 'Любимый трек',uid))
 # cursor.execute(f"SELECT ID FROM Users where login='123'")
 # uid = cursor.fetchall()[0][0]
 print('1.users\n2.portfolios\n3.attr\n4.FULL')

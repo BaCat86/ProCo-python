@@ -4,8 +4,8 @@ import act
 
 def main(): # Точка старта
     db.db_init() # Инициализация бд (проверка, существует ли она и если нет, то создание)
-    local_id = entry_menu()
-    # local_id = ('38e84dc7-ffe8-4584-9d6e-d98782ec81b8', '123') # получаем что-то вроде local_id = (user_id, user_name)
+    # local_id = entry_menu()
+    local_id = ('38e84dc7-ffe8-4584-9d6e-d98782ec81b8', '123') # получаем что-то вроде local_id = (user_id, user_name)
     menu(local_id)
 
 def entry_menu(): # Меню авторизации
@@ -64,6 +64,7 @@ def menu(local_id): # Меню пользователя
         menu(local_id)
 
 def portfolio_edit_menu(local_id):
+    act.clear()
     print("Выберите действие с портфолио из списка:\n--------------\n0.Назад\n1.Посмотреть аттрибуты портфолио\n2.Редактировать значения аттрибутов\n3.Удалить аттрибут\n4.Добавить аттрибут")
     try:
         res = int(input("Ваш выбор: "))

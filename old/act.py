@@ -51,36 +51,69 @@ def portfolio_view(local_id):
     x = input('Нажмите ENTER, что бы продолжить...')
 
 def portfolio_choice(local_id):
-    ptf = db.portfolio_choice(local_id)
-    print("Выберите портфолио из списка:")
-    b = []
-    for i in range(len(ptf)):
-        b.append(ptf[i][0])
-    for _ in range(len(b)):
-        print(f"{_ + 1}. {b[_]}")
-    a = int(input("Ваш выбор: "))
-    a -= 1
-    res = [ptf[a]]
-    return res # Получаем что-то вроде [('ptfName', 'ptfID')] FIX: убрать '[' и ']' в начале и конце соотвтственно, сейчас это не исправляюю тк эта переменная в слишком многих частях кода
-
+    try:
+        ptf = db.portfolio_choice(local_id)
+        print("Для отмены нажмите ENTER...\nВыберите портфолио из списка:")
+        b = []
+        for i in range(len(ptf)):
+            b.append(ptf[i][0])
+        for _ in range(len(b)):
+            print(f"{_ + 1}. {b[_]}")
+        a = int(input("Ваш выбор: "))
+        a -= 1
+        res = [ptf[a]]
+        return res # Получаем что-то вроде [('ptfName', 'ptfID')] FIX: убрать '[' и ']' в начале и конце соотвтственно, сейчас это не исправляюю тк эта переменная в слишком многих частях кода
+    except IndexError:
+        print('Неправильное значение портфолио, попробуйте ещё раз...')
+        _ = input('Нажмите ENTER, что бы продолжить...')
+        res = portfolio_choice(local_id)
+        return res
 
 def portfolio_create(local_id):
+    clear()
     print('Давайте заполним ваше новое портфолио!')
-    name = input('Введите имя человека, на которого заполняется портфолио: ')
-    data = (local_id, name)
-    db.portfolio_create(data)
+    try:
+        name = input('Введите имя человека, на которого заполняется портфолио: ')
+        if name != '' and name.isspace() is False:
+            data = (local_id, name)
+            db.portfolio_create(data)
+        else:
+            print('Нельзя создать портфолио с пустым именем! Попробуйте ещё раз...')
+            _ = input('Нажмите ENTER, что бы продолжить...')
+            portfolio_create(local_id)
+    except db.sqlite3.IntegrityError:
+        print('Портфолио с таким именем уже существует! Попробуйте ещё раз...')
+        _ = input('Нажмите ENTER, что бы продолжить...')
+        portfolio_create(local_id)
+
 
 def attr_create(local_id):
-    attr_name = input("Название аттрибута: ")
-    attr_desc = input("Описание аттрибута: ")
-    data = (attr_name, attr_desc, local_id)
-    db.attr_create(data)
+    try:
+        attr_name = input("Название аттрибута: ")
+        if attr_name != '' and attr_name.isspace() is False:
+            attr_desc = input("Описание аттрибута: ")
+            data = (attr_name, attr_desc, local_id)
+            db.attr_create(data)
+        else:
+            print('Нельзя создать портфолио с пустым именем! Попробуйте ещё раз...')
+            _ = input('Нажмите ENTER, что бы продолжить...')
+            attr_create(local_id)
+    except db.sqlite3.IntegrityError:
+        print('Аттрибут с таким именем уже существует! Попробуйте ещё раз...')
+        _ = input('Нажмите ENTER, что бы продолжить...')
+        attr_create(local_id)
 
 def attr_del(local_id):
-    print("[client][attr_del]Выберите из списка аттрибут для удаления:")
-    b = attr_view(local_id)
-    a = int(input("Ваш выбор: "))
-    db.attr_del(b[a - 1][2])
+    try:
+        print("[client][attr_del]Выберите из списка аттрибут для удаления:")
+        b = attr_view(local_id)
+        a = int(input("Ваш выбор: "))
+        db.attr_del(b[a - 1][2])
+    except IndexError as e:
+        print(str(e))
+        print('Неправильное значение аттрибута, попробуйте ещё раз...')
+        _ = input('Нажмите ENTER, что бы продолжить...')
+        attr_del(local_id)
 
 def attr_view(local_id):
     attr = db.attr_view(local_id)
@@ -97,6 +130,7 @@ def ptf_attr_view(local_id):
             print(f"{_ + 1}. {attr[_][0][0]} - {attr[_][0][1]}")
     else:
         print(f"Портфолио {ptf[0][0]} не имеет аттрибуты")
+    _ = input('Нажмите ENTER, что бы продолжить...')
 
 def ptf_attr_choice(local_id):
     ptf = portfolio_choice(local_id)

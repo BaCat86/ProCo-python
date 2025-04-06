@@ -101,9 +101,11 @@ def db_init(): # Инициализация (создаёт бд, если её 
     #   FOREIGN KEY (AID) REFERENCES Attr (ID));''')
     # print("[server][db_create]Создание таблицы BaseGroup - успешно")
 
+    # Создание уникальных индексов, что бы те или инные данные в таблицах не повторялись
     cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_login ON Users (login);')
     cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_email ON Users (email);')
     cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_ptf ON Portfolios (Name);')
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_attr ON Attr (Name);')
 
     connection.commit() # Изменения сохранены
     # print("[server][db_create]Изменения сохранены")
