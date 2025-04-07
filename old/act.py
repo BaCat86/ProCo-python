@@ -26,8 +26,23 @@ def registration():
     try:
         print("[client][registration]Необходимо пройти регистрацию")
         user_login = input("[client][registration]Пожалуйста, введите желаемый логин: ")
+        if user_login == '' or user_login.isspace() is True:
+            print('Нельзя создать аккаунт с пустым логином! Попробуйте ещё раз...')
+            _ = input('Нажмите ENTER, что бы продолжить...')
+            registration()
+            pass
         user_password = input("[client][registration]Отлично!\nТеперь введите пароль: ")
+        if user_password == '' or user_password.isspace() is True:
+            print('Нельзя создать аккаунт с пустым паролем! Попробуйте ещё раз...')
+            _ = input('Нажмите ENTER, что бы продолжить...')
+            registration()
+            pass
         user_email = input("[client][registration]И на последок!\nВведите электронную почту: ")
+        if user_email == '' or user_email.isspace() is True:
+            print('Нельзя создать аккаунт с пустой почтой! Попробуйте ещё раз...')
+            _ = input('Нажмите ENTER, что бы продолжить...')
+            registration()
+            pass
         data = (user_login, user_password, user_email)
         db.registration(data)
     except db.sqlite3.IntegrityError as e:
@@ -95,7 +110,7 @@ def attr_create(local_id):
             data = (attr_name, attr_desc, local_id)
             db.attr_create(data)
         else:
-            print('Нельзя создать портфолио с пустым именем! Попробуйте ещё раз...')
+            print('Нельзя создать аттрибут с пустым именем! Попробуйте ещё раз...')
             _ = input('Нажмите ENTER, что бы продолжить...')
             attr_create(local_id)
     except db.sqlite3.IntegrityError:
@@ -168,3 +183,53 @@ def ptf_attr_add(local_id):
     attr = attr_view(local_id)
     attr_res = int(input("Ваш выбор: "))
     db.ptf_attr_add(ptf[0][1], attr[attr_res - 1][2])
+
+def tag_create(local_id):
+    try:
+        tag_name = input("Название тега:  ")
+        if tag_name != '' and tag_name.isspace() is False:
+            data = (tag_name, local_id)
+            db.tag_create(data)
+        else:
+            print('Нельзя создать тег с пустым именем! Попробуйте ещё раз...')
+            _ = input('Нажмите ENTER, что бы продолжить...')
+            tag_create(local_id)
+    except db.sqlite3.IntegrityError:
+        print('Тег с таким именем уже существует! Попробуйте ещё раз...')
+        _ = input('Нажмите ENTER, что бы продолжить...')
+        tag_create(local_id)
+
+def tag_view(local_id):
+    tag = db.tag_view(local_id)
+    for _ in range(len(tag)):
+        print(f"{_ + 1}. {tag[_][0]}")
+    return tag # Получим что-то вроде [['tag1', 'tag1ID'], ..., ['tagN', 'tagNID']]
+
+def tag_del(local_id):
+    try:
+        print("[client][tag_del]Выберите из списка тег для удаления:")
+        b = tag_view(local_id)
+        a = int(input("Ваш выбор: "))
+        db.tag_del(b[a - 1][1])
+    except IndexError as e:
+        print('Неправильное значение тега, попробуйте ещё раз...')
+        _ = input('Нажмите ENTER, что бы продолжить...')
+        attr_del(local_id)
+
+def ptf_tag_add(local_id):
+    ptf = portfolio_choice(local_id)
+    print('Выберите из списка тег, который хотите прикрепить к портфолио')
+    tag = tag_view(local_id)
+    tag_res = int(input("Ваш выбор: "))
+    db.ptf_tag_add(ptf[0][1], tag[tag_res - 1][1])
+    sys.exit()
+
+def ptf_tag_view(local_id):
+    ptf = portfolio_choice(local_id)
+    tag = db.ptf_tag_view(ptf[0][1])
+    if tag != []:
+        print(f"Портфолио {ptf[0][0]} имеет следующие теги:")
+        for _ in range(len(tag)):
+            print(f"{_ + 1}. {tag[_][0][0]}")
+    else:
+        print(f"Портфолио {ptf[0][0]} не имеет тегов")

@@ -4,8 +4,8 @@ import act
 
 def main(): # Точка старта
     db.db_init() # Инициализация бд (проверка, существует ли она и если нет, то создание)
-    # local_id = entry_menu()
-    local_id = ('38e84dc7-ffe8-4584-9d6e-d98782ec81b8', '123') # получаем что-то вроде local_id = (user_id, user_name)
+    local_id = entry_menu()
+    # local_id = ('0a66dd21-c2bb-4842-8d5c-e8d3af636e94', '123') # получаем что-то вроде local_id = (user_id, user_name)
     menu(local_id)
 
 def entry_menu(): # Меню авторизации
@@ -43,7 +43,7 @@ def entry_menu(): # Меню авторизации
 def menu(local_id): # Меню пользователя
     act.clear()
     print(
-        f"[client][menu]С возвращением в ProCo, {local_id[1]}!\nВыберите из списка действие, которое хотите сделать с портфолио:\n--------------\n0. Выход\n1. Посмотреть существующее\n2. Создать новое\n3. Изменить существующее\n4. Редактировать аттрибуты.")
+        f"[client][menu]С возвращением в ProCo, {local_id[1]}!\nВыберите из списка действие, которое хотите сделать с портфолио:\n--------------\n0. Выход\n1. Посмотреть существующее\n2. Создать новое\n3. Изменить существующее\n4. Редактировать аттрибуты\n5. Меню тегов")
     try:
         menu_an = int(input("[client][menu]Ваш выбор: "))
         act.clear()
@@ -57,6 +57,8 @@ def menu(local_id): # Меню пользователя
             portfolio_edit_menu(local_id[0])
         elif menu_an == 4:
             attr_menu(local_id[0])
+        elif menu_an == 5:
+            tag_menu(local_id[0])
         menu(local_id)
     except ValueError:
         act.clear()
@@ -100,6 +102,29 @@ def attr_menu(local_id):
         attr_menu(local_id)
     except ValueError:
         attr_menu(local_id)
+
+def tag_menu(local_id):
+    act.clear()
+    print(
+        "[client][tag_menu]Выберите действие с тегами из списка:\n--------------\n0. Назад\n1. Создание тега\n2. Удаление тега\n3. Посмотреть все теги\n4. Создать связь тега и портфолио\n5. Посмотреть портфолио с тегом")
+    try:
+        tag_menu_an = int(input("[client][tag_menu]Ваш выбор: "))
+        if tag_menu_an == 0:
+            menu(local_id)
+        elif tag_menu_an == 1:
+            act.tag_create(local_id)
+        elif tag_menu_an == 2:
+            act.tag_del(local_id)
+        elif tag_menu_an == 3:
+            act.tag_view(local_id)
+        elif tag_menu_an == 4:
+            act.ptf_tag_add(local_id)
+        elif tag_menu_an == 5:
+            act.ptf_tag_view(local_id)
+        _ = input('Нажмите ENTER, что бы продолжить...')
+        tag_menu(local_id)
+    except ValueError:
+        tag_menu(local_id)
 
 if __name__ == "__main__":
     main()

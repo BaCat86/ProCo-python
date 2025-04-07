@@ -7,10 +7,10 @@ def db_init(): # Инициализация (создаёт бд, если её 
     # Users
     cursor.execute('''CREATE TABLE IF NOT EXISTS Users
     ( ID        TEXT    NOT NULL DEFAULT(lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || '4' || substr(hex(randomblob(2)), 2) || '-' || substr('89AB', 1 + (abs(random()) % 4), 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6)))),
-      login     TEXT    NOT NULL,
+      login     TEXT    NOT NULL UNIQUE,
       password  TEXT    NOT NULL,
       last_seen INTEGER NULL,
-      email     TEXT    NOT NULL,
+      email     TEXT    NOT NULL UNIQUE,
       PRIMARY KEY (ID));''')
     # print("[server][db_create]Создание таблицы Users - успешно")
 
@@ -21,7 +21,7 @@ def db_init(): # Инициализация (создаёт бд, если её 
       -- ID пользователя
       userID   TEXT NOT NULL,
       -- Имя портфолио
-      Name     TEXT NOT NULL,
+      Name     TEXT NOT NULL UNIQUE,
       -- изображение портфолио
       pictures TEXT NULL    ,
       PRIMARY KEY (ID),
@@ -33,8 +33,12 @@ def db_init(): # Инициализация (создаёт бд, если её 
     ( -- ID тэга
       ID   TEXT NOT NULL DEFAULT(lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || '4' || substr(hex(randomblob(2)), 2) || '-' || substr('89AB', 1 + (abs(random()) % 4), 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6)))),
       -- Что за тэг
-      Name TEXT NOT NULL,
-      PRIMARY KEY (ID));''')
+      Name TEXT NOT NULL UNIQUE,
+      -- ID пользователя
+      UID   TEXT NOT NULL,
+      PRIMARY KEY (ID),
+      FOREIGN KEY (UID) REFERENCES Users (ID)
+      );''')
     # print("[server][db_create]Создание таблицы Tags - успешно")
 
     # tagAssign
@@ -54,7 +58,7 @@ def db_init(): # Инициализация (создаёт бд, если её 
     ( -- ID атрибута
       ID   TEXT NOT NULL DEFAULT (lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || '4' || substr(hex(randomblob(2)), 2) || '-' || substr('89AB', 1 + (abs(random()) % 4), 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6)))),
       -- имя атрибута
-      Name TEXT NOT NULL,
+      Name TEXT NOT NULL UNIQUE,
       -- Описание атрибута
       desc TEXT NULL    ,
       -- ID пользователя
@@ -102,10 +106,10 @@ def db_init(): # Инициализация (создаёт бд, если её 
     # print("[server][db_create]Создание таблицы BaseGroup - успешно")
 
     # Создание уникальных индексов, что бы те или инные данные в таблицах не повторялись
-    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_login ON Users (login);')
-    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_email ON Users (email);')
-    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_ptf ON Portfolios (Name);')
-    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_attr ON Attr (Name);')
+    # cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_login ON Users (login);')
+    # cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_email ON Users (email);')
+    # cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_ptf ON Portfolios (Name);')
+    # cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_attr ON Attr (Name);')
 
     connection.commit() # Изменения сохранены
     # print("[server][db_create]Изменения сохранены")
@@ -157,20 +161,15 @@ def portfolio_view(ptf_id): # Получение из бд атрибутов п
     cursor.execute(f"SELECT vID FROM attrAssign where ptfID='{ptf_id}'")
     ___ = cursor.fetchall()
     _ = (__, ___) # Получим что-то вроде([('attrID1',), ('attrID2',), ...,('attrIDn',)], [('vID1',), ('vID2',), ..., ('vIDn',)])
-    # print(_)
     __ = []
     for i in _[0]:
-        # print(i[0])
         cursor.execute(f"SELECT Name, desc FROM Attr where ID='{i[0]}'")
         a = cursor.fetchall()
-        # print(a)
         __.append(a)
     ___ = []
     for i in _[1]:
-        # print(i[0])
         cursor.execute(f"SELECT value, meta FROM value where ID='{i[0]}'")
         a = cursor.fetchall()
-        # print(a)
         ___.append(a)
     res = (__, ___) # Получу что-то вроде ([[('attrName1', 'attrDesc1')], [('attrName2', 'attrDesc2')], ..., [('attrNameN', 'attrDescN')]], [[('value1', 'meta1')], [(value2, 'meta2')], ..., [(valueN, 'metaN')]])
     return res
@@ -227,3 +226,39 @@ def ptf_attr_del(attr_id): # Удаление из бд связи между а
     cursor.execute(f"DELETE FROM attrAssign where attrID='{attr_id}'")
     connection.commit()
     print('[server][attr_del]Отлично, аттрибут удалён!')
+
+def tag_view(local_id): # Получение из бд всех тегов пользователя, на вход получает что-то вроде 'userID'
+    cursor.execute(f"SELECT Name, ID FROM Tags where UID='{local_id}'")
+    a = cursor.fetchall()
+    res = []
+    for i in range(len(a)):
+        res.append([a[i][0], a[i][1]])
+    return res # Получим что-то вроде [['tag1', 'tag1ID'], ..., ['tagN', 'tagNID']]
+
+def tag_create(data): # Сохранение тега в бд, принимает что-то вроде (tagName, userID)
+    cursor.execute("INSERT INTO Tags (Name, UID) VALUES (?, ?)", data)
+    connection.commit()
+    print('[server][portfolio_create]Отлично, тег создан!')
+
+def tag_del(tagid): # Удаление тега из бд, принимает что-то вроде tagID
+    cursor.execute(f"DELETE FROM Tags where ID='{tagid}'")
+    connection.commit()
+    print('[server][attr_del]Отлично, тег удалён!')
+
+def ptf_tag_add(ptf_id, tag_res):
+    data = (ptf_id, tag_res)
+    cursor.execute(f"INSERT INTO tagAssign (ptfID, tagID) VALUES (?, ?)", data)
+    connection.commit()
+    print('[server][ptf_tag_add]Отлично, аттрибут привязан к портфолио!')
+
+def ptf_tag_view(ptf_id):
+    cursor.execute(f"SELECT tagID FROM tagAssign where ptfID='{ptf_id}'")
+    tagid = cursor.fetchall()
+    a = []
+    for _ in tagid:
+        a.append(_[0]) # Не, ну это лютый говнокод, но иначе с этим дико не удобно работатать
+    res = []
+    for _ in a:
+        cursor.execute(f"SELECT Name FROM Tags where ID='{_}'")
+        res.append(cursor.fetchall())
+    return res
