@@ -1,7 +1,7 @@
 import sqlite3
 import sys
 
-connection = sqlite3.connect("portfolios.db")
+connection = sqlite3.connect("old/portfolios.db")
 cursor = connection.cursor()
 def db_init(): # Инициализация (создаёт бд, если её не существует)
     # Users
@@ -33,11 +33,12 @@ def db_init(): # Инициализация (создаёт бд, если её 
     ( -- ID тэга
       ID   TEXT NOT NULL DEFAULT(lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || '4' || substr(hex(randomblob(2)), 2) || '-' || substr('89AB', 1 + (abs(random()) % 4), 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6)))),
       -- Что за тэг
-      Name TEXT NOT NULL UNIQUE,
+      Name TEXT NOT NULL,
       -- ID пользователя
       UID   TEXT NOT NULL,
       PRIMARY KEY (ID),
       FOREIGN KEY (UID) REFERENCES Users (ID)
+      UNIQUE(Name, UID)
       );''')
     # print("[server][db_create]Создание таблицы Tags - успешно")
 
@@ -186,6 +187,8 @@ def attr_view(local_id): # Получение из бд всех аттрибу�
     res = []
     for i in range(len(a)):
         res.append([a[i][0], a[i][1], a[i][2]])
+    if res == []:
+        print('[server][attr_view] У пользователя нет аттрибутов')
     return res
 
 def ptf_attr_view(ptf_id): # Получение из бд аттрибутов этого портфолио

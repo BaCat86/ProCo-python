@@ -122,8 +122,9 @@ def attr_del(local_id):
     try:
         print("[client][attr_del]Выберите из списка аттрибут для удаления:")
         b = attr_view(local_id)
-        a = int(input("Ваш выбор: "))
-        db.attr_del(b[a - 1][2])
+        if b != []:
+            a = int(input("Ваш выбор: "))
+            db.attr_del(b[a - 1][2])
     except IndexError as e:
         print(str(e))
         print('Неправильное значение аттрибута, попробуйте ещё раз...')
