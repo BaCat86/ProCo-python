@@ -16,3 +16,9 @@ def server_priv():
 def server_bimbim():
     # print('Проверка работы сервера от пользователя...')
     return 'bimbim'
+
+
+# languages = {'ru': ['текст 1', 'текст 2'],
+#                        'en': ['text1','text2']}
+# lang_cfg = 'ru'
+# print(languages[lang_cfg][0])
