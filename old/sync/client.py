@@ -13,6 +13,7 @@ url_sign_up = 'authorization/sign_up'
 #     print("JSON Response:", response.json())
 
 def sign_up():
+
     data = {
         "user_login": "123",
         "user_password": "123",

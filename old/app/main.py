@@ -1,4 +1,4 @@
-import sys
+
 import db_working as db
 import act
 

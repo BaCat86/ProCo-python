@@ -1,23 +1,16 @@
+#  В основном сделано по этому гайду https://codelab.pro/kurs-po-fastapi-avtorizacziya-i-autentifikacziya-5/
 from fastapi import FastAPI
 from pydantic import BaseModel
 
 import db_working as db
 import act
 
-app = FastAPI()
+app = FastAPI() # Создаём приложение
 
 class Sign_up_item(BaseModel): # То, какой объет JSON мы должны получить
     user_login: str
     user_password: str
     user_email: str
-
-# @app.post("/items/")
-# async def create_item(item: Item):
-#     return {
-#         "message": "Данные получены (JSON)",
-#         "name": item.name,
-#         "description": item.description
-#     }
 
 @app.get("/ping") # Проверка, доступен ли сервер
 async def ping():
@@ -27,7 +20,6 @@ async def ping():
 async def sign_up(item: Sign_up_item):
     print('[server][sign_up] sign_up')
     print(item)
-    # return 'sign_up'
     data = (item.user_login, item.user_password, item.user_email)
     try:
         db.registration(data)
