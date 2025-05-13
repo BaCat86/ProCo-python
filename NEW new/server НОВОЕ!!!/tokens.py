@@ -2,7 +2,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
 # Секретный ключ для подписи токенов
-SECRET_KEY = "2696f046e12af8cc98e04706a11d7829201a3fcd5fb56a39501e3fdcca712669"
+SECRET_KEY = "1jWMr9Aq0DektIttfxeKG2+SkipAox8Tf6dyNJ/AoQk="
 ALGORITHM = "HS256"  # Алгоритм подписи
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Время жизни токена
 
