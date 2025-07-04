@@ -2,12 +2,15 @@
 import db_working as db
 import act
 
+TUD : list = [None, None] #Temporary User Data
+
 def main(): # Точка старта
     db.db_init() # Инициализация бд (проверка, существует ли она и если нет, то создание)
-    local_id = entry_menu()
+    TUD[0] = entry_menu()[0]
+    TUD[1] = entry_menu()[1]
     # local_id = ('0a66dd21-c2bb-4842-8d5c-e8d3af636e94', '123') # получаем что-то вроде local_id = (user_id, user_name)
-    menu(local_id)
-
+    menu(TUD[0])
+    
 def entry_menu(): # Меню авторизации
     print(
         "[client][entry_menu]Добро пожаловать в ProCo!\nПожалуйта, выберите из списка желаемое действие:\n--------------\n0.Выход\n1.Вход\n2.Регистрация")
@@ -17,7 +20,6 @@ def entry_menu(): # Меню авторизации
         if menu_an in a:
             if menu_an == 1:
                 _ = act.authorization()
-                print(_)
                 return _
             elif menu_an == 2:
                 act.registration()
@@ -44,22 +46,22 @@ def menu(local_id): # Меню пользователя
     act.clear()
     # [TODO] Критический баг, при возвращении в это меню программа падает, так как в функцию мы передаём только  ID пользователя, а значит и вернуть имя они - не могут
     print(
-        f"[client][menu]С возвращением в ProCo, {local_id[1]}!\nВыберите из списка действие, которое хотите сделать с портфолио:\n--------------\n0. Выход\n1. Посмотреть существующее\n2. Создать новое\n3. Изменить существующее\n4. Редактировать аттрибуты\n5. Меню тегов")
+        f"[client][menu]С возвращением в ProCo, {TUD[1]}!\nВыберите из списка действие, которое хотите сделать с портфолио:\n--------------\n0. Выход\n1. Посмотреть существующее\n2. Создать новое\n3. Изменить существующее\n4. Редактировать аттрибуты\n5. Меню тегов")
     try:
         menu_an = int(input("[client][menu]Ваш выбор: "))
         act.clear()
         if menu_an == 0:
             sys.exit()
         elif menu_an == 1:
-            act.portfolio_view(local_id[0])
+            act.portfolio_view(local_id)
         elif menu_an == 2:
-            act.portfolio_create(local_id[0])
+            act.portfolio_create(local_id)
         elif menu_an == 3:
-            portfolio_edit_menu(local_id[0])
+            portfolio_edit_menu(local_id)
         elif menu_an == 4:
-            attr_menu(local_id[0])
+            attr_menu(local_id)
         elif menu_an == 5:
-            tag_menu(local_id[0])
+            tag_menu(local_id)
         menu(local_id)
     except ValueError:
         act.clear()
